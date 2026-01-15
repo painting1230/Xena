@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>给娜的惊喜弹窗</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5e6ff 0%, #e6ccff 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            color: #4a1a7a;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+        }
+        
+        header {
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            color: #7b1fa2;
+            text-shadow: 3px 3px 0 #e1bee7;
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1:after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 5px;
+            background: #ba68c8;
+            border-radius: 5px;
+        }
+        
+        .subtitle {
+            font-size: 1.4rem;
+            color: #8e24aa;
+            margin-bottom: 30px;
+        }
+        
+        .main-btn {
+            background: linear-gradient(45deg, #9c27b0, #7b1fa2);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.8rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(123, 31, 162, 0.3);
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .main-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(123, 31, 162, 0.4);
+        }
+        
+        .main-btn:active {
+            transform: translateY(0);
+        }
+        
+        .main-btn:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+        
+        .main-btn:hover:before {
+            left: 100%;
+        }
+        
+        .click-counter {
+            font-size: 1.2rem;
+            color: #8e24aa;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px 20px;
+            border-radius: 30px;
+            display: inline-block;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 30px;
+            color: #6a1b9a;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 2px dashed #ba68c8;
+        }
+        
+        .popup-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .popup {
+            position: absolute;
+            width: 320px;
+            min-height: 220px;
+            background: linear-gradient(135deg, #e1bee7, #ce93d8);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            pointer-events: auto;
+            border: 5px solid #ab47bc;
+            transform: scale(0);
+            transition: transform 0.3s ease-out;
+            z-index: 1001;
+            overflow: hidden;
+        }
+        
+        .popup.show {
+            transform: scale(1);
+            animation: popupAppear 0.5s ease-out;
+        }
+
+        /* 小弹窗样式 */
+        .popup.mini {
+            width: 150px;
+            height: 100px;
+            font-size: 14px;
+            padding: 15px;
+            z-index: 1002;
+            background: linear-gradient(135deg, #f8bbd9, #f48fb1);
+        }
+
+        .popup.mini .popup-content {
+            font-size: 16px;
+            min-height: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        @keyframes popupAppear {
+            0% { transform: scale(0) rotate(-180deg); }
+            70% { transform: scale(1.1) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #9c27b0;
+            padding-bottom: 10px;
+        }
+        
+        .popup-title {
+            font-size: 1.5rem;
+            color: #7b1fa2;
+            font-weight: bold;
+        }
+        
+        .close-btn {
+            background: #9c27b0;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+        }
+        
+        .popup-content {
+            font-size: 1.3rem;
+            line-height: 1.5;
+            color: #4a0072;
+            margin-bottom: 20px;
+            min-height: 100px;
+        }
+        
+        .popup-footer {
+            text-align: center;
+            font-style: italic;
+            color: #7b1fa2;
+            border-top: 1px solid #ba68c8;
+            padding-top: 10px;
+        }
+        
+        .heart {
+            color: #e91e63;
+            animation: heartbeat 1.5s infinite;
+            display: inline-block;
+        }
+        
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .floating-hearts {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1; /* 降低爱心层的z-index，确保🦄在上层 */
+        }
+
+        .heart-icon {
+            position: absolute;
+            color: rgba(156, 39, 176, 0.3);
+            font-size: 24px;
+            animation: float 6s ease-in infinite;
+        }
+
+        .floating-unicorns {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .unicorn-icon {
+            position: absolute;
+            font-size: 36px;
+            animation: float 8s ease-in infinite;
+            opacity: 0.6;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.7; }
+            90% { opacity: 0.7; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+        
+        footer {
+            margin-top: 40px;
+            color: #7b1fa2;
+            font-size: 1rem;
+            text-align: center;
+            padding: 15px;
+            width: 100%;
+            border-top: 2px solid #e1bee7;
+        }
+        
+        /* Xena游动元素样式 */
+        #xena {
+            position: fixed;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            z-index: 500;
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: linear-gradient(45deg, #9c27b0, #7b1fa2);
+            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: xenaFloat 3s ease-in-out infinite;
+            border: 2px solid white;
+        }
+
+        @keyframes xenaFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-5px) rotate(-1deg); }
+            75% { transform: translateY(5px) rotate(1deg); }
+        }
+
+        .xena-text {
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .main-btn {
+                padding: 15px 30px;
+                font-size: 1.5rem;
+            }
+
+            .popup {
+                width: 280px;
+                min-height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-hearts" id="hearts-container"></div>
+    <div class="floating-unicorns" id="unicorns-container"></div>
+    <!-- 游动的Xena元素 -->
+    <div id="xena" class="xena-text">Xena</div>
+    
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-gift"></i> 给娜的惊喜 <i class="fas fa-gift"></i></h1>
+        </header>
+        
+        <button class="main-btn" id="mainButton">
+            <i class="fas fa-star"></i> 点击开启惊喜 <i class="fas fa-star"></i>
+        </button>
+        
+        <div class="click-counter" id="clickCounter">
+            已点击: <span id="clickCount">0</span> 次
+        </div>
+        
+        <div class="instructions">
+            <p><i class="fas fa-info-circle"></i> 点击上面的按钮会出现惊喜弹窗！</p>
+            <p>弹窗内容会先显示我对你的印象，再次点击会显示我的祝福～</p>
+            <p>弹窗可以拖动，点击右上角的×可以关闭</p>
+        </div>
+    </div>
+    
+    <div class="popup-container" id="popupContainer"></div>
+    
+    <footer>
+        <p>专门为娜制作的惊喜页面 <span class="heart">❤</span> | 愿你每天开心快乐！</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainButton = document.getElementById('mainButton');
+            const popupContainer = document.getElementById('popupContainer');
+            const clickCountElement = document.getElementById('clickCount');
+            const heartsContainer = document.getElementById('heartsContainer');
+            const xena = document.getElementById('xena');
+            
+            let clickCount = 0;
+            let isFirstImpression = true;
+            let popupCount = 0;
+            let currentPopup = null;
+
+            // 印象内容数组
+            const impressions = [
+                "2004年12月25日出生的摩羯座，圣诞宝宝。",
+                "来自广西柳州，在来宾上大学。",
+                "英语专业，做PPT有一手。",
+                "身高一米五，瘦瘦的但很有料。",
+                "眼睛布灵布灵的。",
+                "有好多风格不同的裙子，今天新中式明天洛丽塔。",
+                "戴眼镜时显得聪明，不戴时很萌。",
+                "是个很爱干净的小女孩。",
+                "演讲时整个人在发光，很厉害。",
+                "唱歌的神，走路自带BGM。",
+                "拥有满级沟通力，跟着总能吃到又便宜又好的饭和奶茶。",
+                "像热情明媚的小太阳，照到人身上暖暖的。",
+                "性格很勇敢，社交范围广阔如海。",
+                "总体乐观，但认真劲儿上来也很帅。",
+                "长跑一骑绝尘，但冬天跑步容易感冒。",
+                "世界蜉蝣、祈我永絮，明媚、张扬、勇敢、平静。",
+                "初一就注意到你，在操场第一次说上话，还在QQ空间祝你生日快乐。",
+                "后来进了同一个班级，还一起参加过跳绳比赛，你是个奇女子。",
+                "平时线上聊天不停，放假了就见面。",
+                "你是我心中的\"阳光彩虹小白马\"。",
+                "你明朗又温暖。",
+                "让我更有底气和世界碰撞，又温柔提醒我避开人情世故的坑。",
+                "我知道你会一直喜欢我，我也一样。",
+                "我们说好了，我会一直陪着你，你也是。"
+            ];
+
+            // 祝福内容数组
+            const blessings = [
+                "愿岁并谢，与长友兮。",
+                "岁晚青山路，白首期同归。",
+                "人生得一知己足矣，斯世当以同怀视之。",
+                "故人入我梦，明我长相忆。",
+                "我见君来，顿觉吾庐，溪山美哉。",
+                "愿你仍然是新时代的清风，灌注在我的灵魂之中。",
+                "愿你的未来纯净明朗，像你此刻的可爱目光，在世间美好的命运中，愿你的命运美好欢畅。",
+                "桥都坚固，隧道都光明。",
+                "愿你在迷茫时，坚信你的珍贵。爱你所爱，行你所行，听从你心，无问西东。",
+                "那我祝你万事胜意吧。意思就是，一切都比你自己所期待的，还要好一点点。",
+                "希望你继续兴致盎然地与世界交手，一直走在开满鲜花的路上。",
+                "永远向前看，永远相信坦途在前，相信美好的事物，总会迎面而来。",
+                "愿你白天有说有笑，晚上睡个好觉。",
+                "愿你天真而善良，温柔而坚定，面对困难时，总有超凡脱俗的自信。",
+                "相知无远近，万里尚为邻。",
+                "希君生羽翼，一化北溟鱼。",
+                "友情是一株成长缓慢的植物。",
+                "愿你好花常开，好运常来。",
+                "生活如意，周末愉快。",
+                "惟有朋友，始终陪在左右，祝快乐每一天。"
+            ];
+            
+            // 创建漂浮爱心
+            function createFloatingHearts() {
+                for (let i = 0; i < 20; i++) {
+                    const heart = document.createElement('div');
+                    heart.className = 'heart-icon';
+                    heart.innerHTML = '❤';
+                    heart.style.left = Math.random() * 100 + 'vw';
+                    heart.style.animationDelay = Math.random() * 5 + 's';
+                    heart.style.fontSize = (Math.random() * 20 + 15) + 'px';
+                    heartsContainer.appendChild(heart);
+                }
+            }
+
+            // 创建漂浮独角兽
+            function createFloatingUnicorns() {
+                for (let i = 0; i < 8; i++) {
+                    const unicorn = document.createElement('div');
+                    unicorn.className = 'unicorn-icon';
+                    unicorn.innerHTML = '🦄';
+                    unicorn.style.left = Math.random() * 100 + 'vw';
+                    unicorn.style.top = Math.random() * 100 + 'vh';
+                    unicorn.style.animationDelay = Math.random() * 8 + 's';
+                    unicornsContainer.appendChild(unicorn);
+
+                    // 为每个独角兽添加随机移动逻辑
+                    moveUnicornRandomly(unicorn);
+                }
+            }
+
+            // 让独角兽随机移动
+            function moveUnicornRandomly(unicorn) {
+                function move() {
+                    const newX = Math.random() * 100;
+                    const newY = Math.random() * 100;
+                    unicorn.style.left = newX + 'vw';
+                    unicorn.style.top = newY + 'vh';
+                    unicorn.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+
+                    // 随机时间后再次移动
+                    setTimeout(move, Math.random() * 5000 + 3000);
+                }
+                move();
+            }
+            
+            // 创建弹窗
+            function createPopup() {
+                // 移除之前的弹窗
+                if (currentPopup) {
+                    currentPopup.remove();
+                }
+                
+                // 更新点击次数
+                clickCount++;
+                clickCountElement.textContent = clickCount;
+                
+                // 创建新弹窗
+                const popup = document.createElement('div');
+                popup.className = 'popup';
+                popup.id = 'popup' + popupCount;
+                popupCount++;
+                
+                // 随机位置
+                const maxX = window.innerWidth - 350;
+                const maxY = window.innerHeight - 300;
+                const randomX = Math.max(50, Math.min(maxX, Math.random() * maxX));
+                const randomY = Math.max(50, Math.min(maxY, Math.random() * maxY));
+                
+                popup.style.left = randomX + 'px';
+                popup.style.top = randomY + 'px';
+                
+                // 设置弹窗内容
+                let title, content, footer;
+                
+                if (isFirstImpression) {
+                    title = "我对你的印象";
+                    // 随机选择一个印象内容
+                    const randomIndex = Math.floor(Math.random() * impressions.length);
+                    content = impressions[randomIndex];
+                    footer = "你在我心中的样子～";
+                } else {
+                    title = "我对你的祝福";
+                    // 随机选择一个祝福内容
+                    const randomIndex = Math.floor(Math.random() * blessings.length);
+                    content = blessings[randomIndex];
+                    footer = "最好的祝福送给你！";
+                }
+                
+                // 切换下一次的内容
+                isFirstImpression = !isFirstImpression;
+                
+                // 弹窗内部结构
+                popup.innerHTML = `
+                    <div class="popup-header">
+                        <div class="popup-title">${title}</div>
+                        <button class="close-btn" data-popup-id="${popup.id}">×</button>
+                    </div>
+                    <div class="popup-content">${content}</div>
+                    <div class="popup-footer">${footer} <span class="heart">❤</span></div>
+                `;
+                
+                // 添加到容器
+                popupContainer.appendChild(popup);
+                currentPopup = popup;
+                
+                // 显示弹窗动画
+                setTimeout(() => {
+                    popup.classList.add('show');
+                }, 10);
+                
+                // 使弹窗可拖动
+                makePopupDraggable(popup);
+                
+                // 添加关闭按钮事件
+                const closeBtn = popup.querySelector('.close-btn');
+                closeBtn.addEventListener('click', function() {
+                    const popupId = this.getAttribute('data-popup-id');
+                    const popupToClose = document.getElementById(popupId);
+                    if (popupToClose) {
+                        popupToClose.classList.remove('show');
+                        setTimeout(() => {
+                            if (popupToClose.parentNode) {
+                                popupToClose.parentNode.removeChild(popupToClose);
+                            }
+                            if (currentPopup && currentPopup.id === popupId) {
+                                currentPopup = null;
+                            }
+                        }, 300);
+                    }
+                });
+                
+                // 随机弹窗颜色
+                const colors = [
+                    'linear-gradient(135deg, #e1bee7, #ce93d8)',
+                    'linear-gradient(135deg, #f3e5f5, #e1bee7)',
+                    'linear-gradient(135deg, #f8bbd9, #f48fb1)',
+                    'linear-gradient(135deg, #d1c4e9, #b39ddb)'
+                ];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                popup.style.background = randomColor;
+            }
+            
+            // 使弹窗可拖动
+            function makePopupDraggable(popup) {
+                let isDragging = false;
+                let offsetX, offsetY;
+                
+                const header = popup.querySelector('.popup-header');
+                
+                header.addEventListener('mousedown', startDrag);
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('mouseup', stopDrag);
+                
+                function startDrag(e) {
+                    if (e.target.className === 'close-btn') return;
+                    
+                    isDragging = true;
+                    const rect = popup.getBoundingClientRect();
+                    offsetX = e.clientX - rect.left;
+                    offsetY = e.clientY - rect.top;
+                    popup.style.cursor = 'grabbing';
+                }
+                
+                function drag(e) {
+                    if (!isDragging) return;
+                    
+                    e.preventDefault();
+                    
+                    let newX = e.clientX - offsetX;
+                    let newY = e.clientY - offsetY;
+                    
+                    // 限制在窗口范围内
+                    const maxX = window.innerWidth - popup.offsetWidth;
+                    const maxY = window.innerHeight - popup.offsetHeight;
+                    
+                    newX = Math.max(0, Math.min(newX, maxX));
+                    newY = Math.max(0, Math.min(newY, maxY));
+                    
+                    popup.style.left = newX + 'px';
+                    popup.style.top = newY + 'px';
+                }
+                
+                function stopDrag() {
+                    isDragging = false;
+                    popup.style.cursor = 'default';
+                }
+            }
+            
+            // 主按钮点击事件
+            mainButton.addEventListener('click', createPopup);
+            
+            // 初始化漂浮爱心
+            createFloatingHearts();
+
+            // 初始化漂浮独角兽
+            createFloatingUnicorns();
+
+            // Xena游动功能
+            function initXena() {
+                const xena = document.getElementById('xena');
+
+                // 设置Xena初始大小（参考页面中的元素）
+                const mainButton = document.getElementById('mainButton');
+                if (mainButton) {
+                    const buttonRect = mainButton.getBoundingClientRect();
+                    // 根据按钮大小调整Xena的大小
+                    const size = Math.min(buttonRect.width, buttonRect.height) * 0.15;
+                    xena.style.fontSize = Math.max(16, Math.min(30, size)) + 'px';
+                    xena.style.padding = Math.max(5, Math.min(10, size/3)) + 'px ' + Math.max(10, Math.min(20, size/2)) + 'px';
+                }
+
+                // 初始位置
+                let posX = Math.random() * (window.innerWidth - 100);
+                let posY = Math.random() * (window.innerHeight - 60);
+                xena.style.left = posX + 'px';
+                xena.style.top = posY + 'px';
+
+                // 游动方向
+                let dirX = (Math.random() - 0.5) * 3;
+                let dirY = (Math.random() - 0.5) * 3;
+
+                // Xena游动动画
+                function moveXena() {
+                    // 获取当前位置
+                    const rect = xena.getBoundingClientRect();
+                    posX = rect.left;
+                    posY = rect.top;
+
+                    // 计算新位置
+                    posX += dirX;
+                    posY += dirY;
+
+                    // 边界检测
+                    if (posX <= 0 || posX >= window.innerWidth - rect.width) {
+                        dirX = -dirX;
+                        // 边界反弹时改变颜色
+                        const hue = Math.floor(Math.random() * 60) + 270; // 紫色范围
+                        xena.style.background = `linear-gradient(45deg, hsl(${hue}, 70%, 50%), hsl(${hue + 20}, 70%, 40%))`;
+                    }
+
+                    if (posY <= 0 || posY >= window.innerHeight - rect.height) {
+                        dirY = -dirY;
+                        // 边界反弹时改变颜色
+                        const hue = Math.floor(Math.random() * 60) + 270; // 紫色范围
+                        xena.style.background = `linear-gradient(45deg, hsl(${hue}, 70%, 50%), hsl(${hue + 20}, 70%, 40%))`;
+                    }
+
+                    // 确保Xena不会移出屏幕
+                    posX = Math.max(0, Math.min(posX, window.innerWidth - rect.width));
+                    posY = Math.max(0, Math.min(posY, window.innerHeight - rect.height));
+
+                    // 应用新位置
+                    xena.style.left = posX + 'px';
+                    xena.style.top = posY + 'px';
+
+                    // 随机改变方向（增加随机性）
+                    if (Math.random() < 0.03) {
+                        dirX += (Math.random() - 0.5) * 1.5;
+                        dirY += (Math.random() - 0.5) * 1.5;
+
+                        // 限制最大速度
+                        const maxSpeed = 4;
+                        dirX = Math.max(-maxSpeed, Math.min(dirX, maxSpeed));
+                        dirY = Math.max(-maxSpeed, Math.min(dirY, maxSpeed));
+                    }
+
+                    // 继续动画
+                    requestAnimationFrame(moveXena);
+                }
+
+                // 点击Xena触发惊喜效果
+                xena.addEventListener('click', function() {
+                    // 创建一个小型弹窗惊喜
+                    createMiniPopup();
+
+                    // 点击时Xena跳动效果
+                    xena.style.transform = 'scale(1.3)';
+                    setTimeout(() => {
+                        xena.style.transform = 'scale(1)';
+                    }, 300);
+
+                    // 改变游动方向和速度
+                    dirX = (Math.random() - 0.5) * 6;
+                    dirY = (Math.random() - 0.5) * 6;
+
+                    // 改变颜色
+                    const hue = Math.floor(Math.random() * 60) + 270; // 紫色范围
+                    xena.style.background = `linear-gradient(45deg, hsl(${hue}, 80%, 60%), hsl(${hue + 30}, 80%, 50%))`;
+                });
+
+                // 鼠标悬停效果
+                xena.addEventListener('mouseenter', function() {
+                    xena.style.transform = 'scale(1.2)';
+                    xena.style.boxShadow = '0 6px 20px rgba(156, 39, 176, 0.6)';
+                });
+
+                xena.addEventListener('mouseleave', function() {
+                    xena.style.transform = 'scale(1)';
+                    xena.style.boxShadow = '0 4px 15px rgba(156, 39, 176, 0.4)';
+                });
+
+                // 开始游动
+                moveXena();
+            }
+
+            // 创建点击Xena时的小型弹窗惊喜
+            function createMiniPopup() {
+                const miniPopup = document.createElement('div');
+                miniPopup.className = 'popup mini';
+
+                // 随机选择一条祝福或印象
+                const isImpression = Math.random() > 0.5;
+                let content, title;
+
+                if (isImpression) {
+                    const randomIndex = Math.floor(Math.random() * impressions.length);
+                    content = impressions[randomIndex];
+                    title = "Xena的印象";
+                } else {
+                    const randomIndex = Math.floor(Math.random() * blessings.length);
+                    content = blessings[randomIndex];
+                    title = "Xena的祝福";
+                }
+
+                miniPopup.innerHTML = `
+                    <div class="popup-header">
+                        <div class="popup-title">${title}</div>
+                    </div>
+                    <div class="popup-content">${content}</div>
+                    <div class="popup-footer">来自Xena的惊喜！ <span class="heart">❤</span></div>
+                `;
+
+                // 随机位置
+                const x = Math.random() * (window.innerWidth - 250);
+                const y = Math.random() * (window.innerHeight - 200);
+                miniPopup.style.left = x + 'px';
+                miniPopup.style.top = y + 'px';
+                miniPopup.style.width = '250px';
+                miniPopup.style.zIndex = '1002';
+
+                // 添加到页面
+                document.getElementById('popupContainer').appendChild(miniPopup);
+
+                // 显示动画
+                setTimeout(() => {
+                    miniPopup.classList.add('show');
+                }, 10);
+
+                // 5秒后消失
+                setTimeout(() => {
+                    miniPopup.classList.remove('show');
+                    setTimeout(() => {
+                        if (miniPopup.parentNode) {
+                            miniPopup.parentNode.removeChild(miniPopup);
+                        }
+                    }, 300);
+                }, 5000);
+            }
+
+            // 初始化Xena游动
+            initXena();
+
+            // 初始弹窗
+            setTimeout(() => {
+                createPopup();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
